@@ -412,13 +412,14 @@ const COURTS = [
   { id: 'A', name: 'A 場（室內）', note: '木地板・冷氣' },
   { id: 'B', name: 'B 場（室內）', note: '木地板・觀眾席' }
 ];
+const GOOGLE_SHEET_WEB_APP_URL = '';
 const pad = n => String(n).padStart(2, '0');
 const DOW = ['日', '一', '二', '三', '四', '五', '六'];
 
 class Component extends DCLogic {
   state = {
     tab: 'book', dateIdx: 0, court: 'A', slots: [], people: 4,
-    name: '', phone: '', deposit: true, done: false, doneLine: '',
+    name: '', phone: '', deposit: true, submitting: false, done: false, doneLine: '',
     orders: [{ id: 'DL2609121', date: '9/18 (五)', court: 'A 場', time: '19:00–20:00', people: 4, total: 500, status: 'paid' }]
   };
 
@@ -566,6 +567,16 @@ class Component extends DCLogic {
   }
 
   componentWillUnmount() { clearInterval(this._bgTimer); }
+
+  async saveBooking(booking) {
+    if (!GOOGLE_SHEET_WEB_APP_URL) return;
+    await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(booking)
+    });
+  }
 
   renderVals() {
     const s = this.state, days = this.days(), day = days[s.dateIdx];
@@ -795,13 +806,27 @@ class Component extends DCLogic {
       ctaText: sel.length ? '確認訂位' : '選擇時段',
       ctaStyle: `flex:0 0 auto;padding:0 22px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;transition:.15s;` +
         (sel.length ? 'background:#27496E;color:#C6A36A;cursor:pointer;' : 'background:#E9E2D4;color:#B3A894;'),
-      onConfirm: sel.length ? () => {
+      onConfirm: sel.length && !s.submitting ? async () => {
         const o = {
           id: 'DL' + (2609200 + s.orders.length + 1), date: `${day.dd} (${DOW[new Date(2026, 8, 16 + s.dateIdx).getDay()]})`,
           court: COURTS.find(c => c.id === s.court).name.slice(0, 3), people: s.people, total,
           time: `${sel[0].label}–${sel[sel.length - 1].label}`, status: s.deposit ? 'paid' : 'hold'
         };
-        this.setState({ done: true, doneLine: `${o.date} ${o.time}・${o.court}・${s.people} 人，共 NT$${total}`, orders: [o, ...s.orders], slots: [] });
+        const booking = {
+          id: o.id, name: s.name, phone: s.phone, date: o.date, time: o.time,
+          court: o.court, people: o.people, total: o.total,
+          deposit: s.deposit ? Math.round(total * 0.3) : 0, status: o.status,
+          createdAt: new Date().toISOString()
+        };
+        this.setState({ submitting: true });
+        try {
+          await this.saveBooking(booking);
+          this.setState({ done: true, doneLine: `${o.date} ${o.time}・${o.court}・${s.people} 人，共 NT$${total}`, orders: [o, ...s.orders], slots: [] });
+        } catch (e) {
+          this.setState({ done: true, doneLine: '訂位已建立，但 Google Sheet 暫時無法同步，請稍後確認。' });
+        } finally {
+          this.setState({ submitting: false });
+        }
       } : null,
 
       done: s.done,
