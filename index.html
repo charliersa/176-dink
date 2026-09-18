@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Archivo:wght@500;600;800&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin:0; background:#15283C; font-family:"Noto Sans TC",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#27496E; text-decoration:none; }
+  a:hover { color:#2C6FB5; }
+  ::-webkit-scrollbar { width:0; height:0; }
+</style>
+</helmet>
+<div style="min-height:100vh;position:relative;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;background:radial-gradient(120% 80% at 50% 0%, #22415F 0%, #15283C 60%);overflow:hidden">
+  <div style="{{ bgImgStyle }}"></div>
+  <div style="{{ bgScrimStyle }}"></div>
+  <div style="position:relative;width:390px;max-width:100%;height:844px;background:linear-gradient(180deg,#FBF7EE 0%,#F3EDE0 55%,#EDE5D5 100%);border-radius:38px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.55);position:relative">
+
+    <div style="{{ appBgImgStyle }}"></div>
+    <div style="{{ appBgScrimStyle }}"></div>
+
+    <div style="position:relative;z-index:1;flex:1;overflow-y:auto;overflow-x:hidden">
+      <sc-if value="{{ isBook }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="padding:46px 20px 16px;display:flex;align-items:center;gap:14px">
+            <div style="display:flex;flex-direction:column;gap:5px;flex:0 0 auto;cursor:pointer">
+              <span style="width:22px;height:2.5px;background:#27496E;border-radius:2px;display:block"></span>
+              <span style="width:22px;height:2.5px;background:#27496E;border-radius:2px;display:block"></span>
+              <span style="width:22px;height:2.5px;background:#27496E;border-radius:2px;display:block"></span>
+            </div>
+            <div style="{{ logoStyle }}"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:21px;font-weight:900;color:#1B3A58;letter-spacing:.02em">{{ tVenue }}</div>
+              <div style="font-family:Archivo,sans-serif;font-size:10px;letter-spacing:.3em;color:#27496E;font-weight:700;margin-top:3px">{{ tEn }}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:7px">
+                <span style="width:18px;height:1.5px;background:#C6A36A;display:inline-block"></span>
+                <span style="font-size:11px;font-weight:700;letter-spacing:.2em;color:#7A7263">{{ tTagline }}</span>
+                <span style="width:18px;height:1.5px;background:#C6A36A;display:inline-block"></span>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:relative;margin:0 16px;height:192px;border-radius:20px;overflow:hidden;box-shadow:0 14px 30px -20px rgba(27,58,88,.6)">
+            <div style="{{ heroBgStyle }}"></div>
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,#27496E 0%,#1B3A58 100%);opacity:{{ heroTintOpacity }};pointer-events:none"></div>
+            <div style="position:absolute;left:22px;bottom:24px;pointer-events:none">
+              <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:.04em;text-shadow:0 2px 14px rgba(21,40,60,.55)">{{ tVenue }}</div>
+              <div style="font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.3em;color:#E8DCC3;font-weight:700;margin-top:6px">{{ tEn }}</div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:14px">
+                <span style="width:22px;height:2px;background:#C6A36A;display:inline-block"></span>
+                <span style="font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.26em;color:#F3EDE0">{{ tHeroTag }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="{{ panelStats }}">
+            <div style="flex:1;background:transparent;border:none;border-radius:18px;padding:13px 15px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27496E" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"></circle><path d="M12 7.6V12l3 2"></path></svg>
+                <div style="font-size:12.5px;color:#1B3A58;font-weight:800">今日空檔</div>
+              </div>
+              <div style="font-family:Archivo,sans-serif;font-size:23px;font-weight:800;margin-top:6px;color:#1B3A58">{{ freeToday }} <span style="font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700">個時段</span></div>
+            </div>
+            <div style="flex:1;background:transparent;border:none;border-radius:18px;padding:13px 15px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27496E" stroke-width="1.9" stroke-linecap="round"><ellipse cx="12" cy="6.6" rx="7" ry="2.8"></ellipse><path d="M5 6.6v10.8c0 1.55 3.13 2.8 7 2.8s7-1.25 7-2.8V6.6M5 12c0 1.55 3.13 2.8 7 2.8s7-1.25 7-2.8"></path></svg>
+                <div style="font-size:12.5px;color:#1B3A58;font-weight:800">場租</div>
+              </div>
+              <div style="font-family:Archivo,sans-serif;font-size:23px;font-weight:800;margin-top:6px;color:#1B3A58">NT$500 <span style="font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700">/ 時</span></div>
+            </div>
+          </div>
+
+          <div style="{{ cardDate }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <div style="display:flex;align-items:center;gap:9px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A58" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M8 3v4M16 3v4M3 10h18"></path></svg>
+                <div style="font-size:16px;font-weight:800;color:#1B3A58">選擇日期</div>
+              </div>
+              <div style="font-size:12px;color:#7A7263;font-weight:600">{{ hoursLabel }}</div>
+            </div>
+            <div style="display:flex;gap:8px;overflow-x:auto;padding:12px 2px 4px;margin:0 -16px;padding-left:16px;padding-right:16px">
+              <sc-for list="{{ dates }}" as="d" hint-placeholder-count="7">
+                <div onClick="{{ d.onClick }}" style="{{ d.style }}">
+                  <div style="font-size:11px;opacity:.7">{{ d.dow }}</div>
+                  <div style="font-family:Archivo,sans-serif;font-size:19px;font-weight:800;margin-top:3px">{{ d.dd }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="{{ cardCourt }}">
+            <div style="display:flex;align-items:center;gap:9px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A58" stroke-width="1.9" stroke-linecap="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>
+              <div style="font-size:16px;font-weight:800;color:#1B3A58">選擇場地</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+              <sc-for list="{{ courts }}" as="c" hint-placeholder-count="2">
+                <div onClick="{{ c.onClick }}" style="{{ c.style }}">
+                  <div style="font-size:15px;font-weight:700">{{ c.name }}</div>
+                  <div style="font-size:11.5px;margin-top:4px;opacity:.75">{{ c.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="{{ cardSlot }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <div style="display:flex;align-items:center;gap:9px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A58" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"></circle><path d="M12 7.6V12l3 2"></path></svg>
+                <div style="font-size:16px;font-weight:800;color:#1B3A58">時段（30 分鐘一格）</div>
+              </div>
+              <div style="font-size:12px;color:#7A7263;font-weight:600">可多選</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px">
+              <sc-for list="{{ slots }}" as="s" hint-placeholder-count="16">
+                <div onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:12px;font-size:11.5px;color:#7A7263">
+              <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#27496E;display:inline-block"></span>已選</div>
+              <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#fff;border:1px solid #DED3BE;display:inline-block"></span>可預約</div>
+              <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#E9E2D4;display:inline-block"></span>已滿</div>
+            </div>
+          </div>
+
+          <div style="{{ cardPeople }}">
+            <div style="display:flex;align-items:center;gap:9px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A58" stroke-width="1.9" stroke-linecap="round"><circle cx="9" cy="8.4" r="3.2"></circle><path d="M3.6 19c.6-3.3 2.8-5 5.4-5s4.8 1.7 5.4 5M16.4 6.6a3 3 0 0 1 0 5.6M18 19c-.3-2-.9-3.4-1.9-4.4"></path></svg>
+              <div style="font-size:16px;font-weight:800;color:#1B3A58">人數</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px">
+              <sc-for list="{{ peopleOpts }}" as="p" hint-placeholder-count="8">
+                <div onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="{{ cardContact }}">
+            <div style="display:flex;align-items:center;gap:9px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A58" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M7 10h4M7 14h7"></path></svg>
+              <div style="font-size:16px;font-weight:800;color:#1B3A58">聯絡資料</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <input value="{{ name }}" onChange="{{ onName }}" placeholder="姓名" style="height:48px;border-radius:12px;border:1px solid #DED3BE;background:#fff;padding:0 14px;font-size:15px;font-family:inherit;color:#1B3A58;outline:none" />
+              <input value="{{ phone }}" onChange="{{ onPhone }}" placeholder="手機號碼" style="height:48px;border-radius:12px;border:1px solid #DED3BE;background:#fff;padding:0 14px;font-size:15px;font-family:inherit;color:#1B3A58;outline:none" />
+              <div onClick="{{ toggleDeposit }}" style="{{ depositStyle }}">
+                <div>
+                  <div style="font-size:14px;font-weight:700">線上付訂金 30%</div>
+                  <div style="font-size:11.5px;color:#7A7263;margin-top:2px">餘額現場支付；不付訂金則保留 15 分鐘</div>
+                </div>
+                <div style="font-family:Archivo,sans-serif;font-size:15px;font-weight:800;color:#27496E">{{ depositText }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:140px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGroup }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="{{ hdrGroup }}">
+            <div style="font-size:21px;font-weight:900">{{ tGroupTitle }}</div>
+            <div style="font-size:12.5px;color:#DCCBA8;margin-top:5px">{{ tGroupSub }}</div>
+          </div>
+          <div style="padding:16px 20px 150px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+              <div style="background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F1 100%);border:1px solid #E2D9C6;border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(22,38,58,.05),0 8px 20px -14px rgba(22,38,58,.18)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:#27496E;background:#EFE7D6;display:inline-block;padding:3px 8px;border-radius:6px">{{ g.level }}</div>
+                    <div style="font-size:16px;font-weight:800;color:#1B3A58;margin-top:8px">{{ g.date }} {{ g.time }}</div>
+                    <div style="font-size:12.5px;color:#7A7263;margin-top:4px">{{ g.court }}・發起人 {{ g.host }}</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-family:Archivo,sans-serif;font-size:19px;font-weight:800;color:#1B3A58">NT${{ g.fee }}</div>
+                    <div style="font-size:11px;color:#7A7263">每人</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px">
+                  <div style="font-size:12.5px;color:#22415F;font-weight:700">{{ g.joined }} / {{ g.cap }} 人已加入</div>
+                  <div onClick="{{ g.onJoin }}" style="{{ g.btnStyle }}">{{ g.btnText }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isClass }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="{{ hdrClass }}">
+            <div style="font-size:21px;font-weight:900">{{ tClassTitle }}</div>
+            <div style="font-size:12.5px;color:#DCCBA8;margin-top:5px">{{ tClassSub }}</div>
+          </div>
+          <div style="padding:16px 20px 150px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ classes }}" as="c" hint-placeholder-count="3">
+              <div style="background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F1 100%);border:1px solid #E2D9C6;border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(22,38,58,.05),0 8px 20px -14px rgba(22,38,58,.18);display:flex;gap:14px">
+                <div style="width:52px;height:52px;flex:0 0 auto;border-radius:14px;background:#C6A36A;color:#27496E;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900">{{ c.initial }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:16px;font-weight:800;color:#1B3A58">{{ c.title }}</div>
+                  <div style="font-size:12.5px;color:#7A7263;margin-top:4px">{{ c.coach }}・{{ c.slot }}</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px">
+                    <div style="font-family:Archivo,sans-serif;font-size:17px;font-weight:800;color:#1B3A58">NT${{ c.fee }}</div>
+                    <div onClick="{{ c.onBook }}" style="{{ c.btnStyle }}">{{ c.btnText }}</div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMine }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="{{ hdrMine }}">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="width:48px;height:48px;border-radius:50%;background:#C6A36A;color:#27496E;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900">王</div>
+              <div>
+                <div style="font-size:18px;font-weight:800">王小明</div>
+                <div style="font-size:12px;color:#DCCBA8;margin-top:3px">常客會員・回數票剩 6 堂</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:18px 20px 150px">
+            <div style="font-size:15px;font-weight:700;color:#1B3A58">我的訂單</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <sc-for list="{{ orders }}" as="o" hint-placeholder-count="2">
+                <div style="background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F1 100%);border:1px solid #E2D9C6;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(22,38,58,.05),0 8px 20px -14px rgba(22,38,58,.18)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <div style="font-size:15px;font-weight:800;color:#1B3A58">{{ o.date }} {{ o.time }}</div>
+                    <div style="{{ o.badgeStyle }}">{{ o.badge }}</div>
+                  </div>
+                  <div style="font-size:12.5px;color:#7A7263;margin-top:5px">{{ o.court }}・{{ o.people }} 人・NT${{ o.total }}・單號 {{ o.id }}</div>
+                  <div onClick="{{ o.onCancel }}" style="margin-top:12px;height:38px;border-radius:10px;border:1px solid #DED3BE;color:#7A7263;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer">取消訂位</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="font-size:15px;font-weight:700;color:#1B3A58;margin-top:24px">場館資訊</div>
+            <div style="background:#fff;border:1px solid #E2D9C6;border-radius:16px;padding:16px;margin-top:12px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;gap:10px"><div style="font-size:12px;color:#9A8F7C;width:46px;flex:0 0 auto">地址</div><div style="font-size:13px;color:#1B3A58;font-weight:600">{{ tAddress }}</div></div>
+              <div style="display:flex;gap:10px"><div style="font-size:12px;color:#9A8F7C;width:46px;flex:0 0 auto">時間</div><div style="font-size:13px;color:#1B3A58;font-weight:600">{{ tHours }}</div></div>
+              <div style="display:flex;gap:10px"><div style="font-size:12px;color:#9A8F7C;width:46px;flex:0 0 auto">設備</div><div style="font-size:13px;color:#1B3A58;font-weight:600">{{ tFacility }}</div></div>
+              <div style="display:flex;gap:10px"><div style="font-size:12px;color:#9A8F7C;width:46px;flex:0 0 auto">電話</div><div style="font-size:13px;color:#1B3A58;font-weight:600">{{ tPhone }}</div></div>
+            </div>
+
+            <div onClick="{{ toggleLine }}" style="{{ lineStyle }}">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:30px;height:30px;border-radius:8px;background:#06C755;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">L</div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:#1B3A58">LINE 訂位通知</div>
+                  <div style="font-size:11.5px;color:#7A7263;margin-top:2px">開場前 2 小時提醒、候補通知</div>
+                </div>
+              </div>
+              <div style="font-size:13px;font-weight:800;color:#27496E">{{ lineText }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="{{ hdrAdmin }}">
+            <div style="font-size:11px;letter-spacing:.2em;color:#C6A36A;font-family:Archivo,sans-serif;font-weight:600">ADMIN</div>
+            <div style="font-size:21px;font-weight:900;margin-top:5px">今日營運</div>
+            <div style="display:flex;gap:8px;margin-top:16px">
+              <div style="flex:1;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px">
+                <div style="font-size:11px;color:#9A8F7C">訂單</div>
+                <div style="font-family:Archivo,sans-serif;font-size:19px;font-weight:800;margin-top:2px">0</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px">
+                <div style="font-size:11px;color:#9A8F7C">使用率</div>
+                <div style="font-family:Archivo,sans-serif;font-size:19px;font-weight:800;margin-top:2px">0%</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px">
+                <div style="font-size:11px;color:#9A8F7C">收入</div>
+                <div style="font-family:Archivo,sans-serif;font-size:19px;font-weight:800;margin-top:2px">0</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:18px 20px 150px">
+            <div style="display:flex;gap:6px;background:#E9E2D4;border-radius:14px;padding:4px;margin-bottom:16px">
+              <sc-for list="{{ adminTabs }}" as="a" hint-placeholder-count="2">
+                <div onClick="{{ a.onClick }}" style="{{ a.style }}">{{ a.label }}</div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ adminIsBg }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="font-size:15px;font-weight:800;color:#1B3A58">背景圖設定</div>
+                <div style="font-size:12px;color:#7A7263;margin-top:5px;line-height:1.6">點「瀏覽圖片」從裝置選檔套用到該區塊；濃度控制圖片與底色的混合。</div>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+                  <sc-for list="{{ bgRows }}" as="b" hint-placeholder-count="6">
+                    <div style="background:#fff;border:1px solid #E2D9C6;border-radius:16px;padding:12px 14px">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <div style="{{ b.thumbStyle }}"></div>
+                        <div style="flex:1;min-width:0">
+                          <div style="font-size:13.5px;font-weight:800;color:#1B3A58">{{ b.label }}</div>
+                          <div style="font-size:11px;color:#7A7263;margin-top:2px">{{ b.hint }}</div>
+                        </div>
+                        <div onClick="{{ b.onClear }}" style="{{ b.clearStyle }}">清除</div>
+                      </div>
+                      <div style="position:relative;margin-top:10px;height:42px">
+                        <input type="file" accept="image/*" onChange="{{ b.onFile }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2" />
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;border:1px dashed #B3A894;background:#FBF7EE;color:#27496E;font-size:12.5px;font-weight:800;pointer-events:none">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27496E" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3 16l5-4 4 3 3-2 6 4"></path><circle cx="9" cy="9.5" r="1.4"></circle></svg>
+                          <span>{{ b.fileLabel }}</span>
+                        </div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+                        <div style="font-size:11.5px;color:#7A7263;font-weight:700;width:34px;flex:0 0 auto">濃度</div>
+                        <input type="range" min="0" max="100" step="5" value="{{ b.opacity }}" onChange="{{ b.onOpacity }}" style="flex:1;accent-color:#365F86" />
+                        <div style="font-family:Archivo,sans-serif;font-size:12px;font-weight:800;color:#1B3A58;width:34px;text-align:right">{{ b.opacity }}%</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div onClick="{{ onResetBg }}" style="margin-top:16px;height:44px;border-radius:12px;border:1px solid #DED3BE;color:#7A7263;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:#fff">全部恢復預設</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ adminIsTxt }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="font-size:15px;font-weight:700;color:#1B3A58">文字設定</div>
+                <div style="font-size:11.5px;color:#7A7263;margin-top:4px">留白則使用預設文字；設定自動保存</div>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+                  <sc-for list="{{ txtRows }}" as="t" hint-placeholder-count="6">
+                    <div style="background:#fff;border:1px solid #E2D9C6;border-radius:16px;padding:12px 14px">
+                      <div style="font-size:12.5px;font-weight:800;color:#1B3A58;margin-bottom:8px">{{ t.label }}</div>
+                      <input value="{{ t.value }}" onChange="{{ t.onInput }}" placeholder="{{ t.placeholder }}" style="{{ t.rowStyle }}" />
+                      <textarea value="{{ t.value }}" onChange="{{ t.onInput }}" placeholder="{{ t.placeholder }}" style="{{ t.areaStyle }}"></textarea>
+                    </div>
+                  </sc-for>
+                </div>
+                <div onClick="{{ onResetTxt }}" style="margin-top:16px;height:44px;border-radius:12px;border:1px solid #DED3BE;color:#7A7263;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:#fff">全部恢復預設</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ adminIsOrders }}" hint-placeholder-val="{{ true }}">
+            <div>
+            <div style="font-size:15px;font-weight:700;color:#1B3A58">訂位資訊</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              <sc-for list="{{ adminRows }}" as="r" hint-placeholder-count="5">
+                <div style="background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F1 100%);border:1px solid #E2D9C6;border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(22,38,58,.05);display:flex;align-items:center;gap:12px">
+                  <div style="font-family:Archivo,sans-serif;font-size:14px;font-weight:800;color:#1B3A58;width:96px;flex:0 0 auto">{{ r.time }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13.5px;font-weight:700;color:#1B3A58">{{ r.who }}</div>
+                    <div style="font-size:11.5px;color:#7A7263;margin-top:2px">{{ r.court }}・{{ r.people }} 人</div>
+                  </div>
+                  <div style="{{ r.badgeStyle }}">{{ r.badge }}</div>
+                  <div onClick="{{ r.onDelete }}" style="width:30px;height:30px;flex:0 0 auto;border-radius:9px;border:1px solid #E2D9C6;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A4614A" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.6 7l.8 12.2h9.2L17.4 7M10.3 10.6v5.6M13.7 10.6v5.6"></path></svg>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:10">
+      <sc-if value="{{ showBar }}" hint-placeholder-val="{{ true }}">
+        <div style="background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-top:1px solid #E2D9C6;padding:12px 20px 10px;display:flex;align-items:center;gap:12px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11.5px;color:#7A7263">{{ summaryLine }}</div>
+            <div style="font-family:Archivo,sans-serif;font-size:21px;font-weight:800;color:#1B3A58;margin-top:1px">NT$ {{ total }}</div>
+          </div>
+          <div onClick="{{ onConfirm }}" style="{{ ctaStyle }}">{{ ctaText }}</div>
+        </div>
+      </sc-if>
+      <div style="{{ tabBarStyle }}">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+          <div onClick="{{ t.onClick }}" style="{{ t.style }}">
+            <div style="{{ t.iconStyle }}"></div>
+            <div style="font-size:11px;font-weight:800;margin-top:4px;letter-spacing:.02em">{{ t.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(11,18,14,.55);display:flex;align-items:flex-end;padding:16px">
+        <div style="background:#fff;border-radius:24px;padding:26px 22px;width:100%">
+          <div style="width:52px;height:52px;border-radius:50%;background:#C6A36A;display:flex;align-items:center;justify-content:center;font-size:24px">✓</div>
+          <div style="font-size:20px;font-weight:900;color:#1B3A58;margin-top:14px">訂位完成</div>
+          <div style="font-size:13.5px;color:#7A7263;margin-top:6px;line-height:1.6">{{ doneLine }}</div>
+          <div style="display:flex;gap:10px;align-items:center;background:#EFE7D6;border-radius:14px;padding:12px;margin-top:16px">
+            <div style="width:30px;height:30px;border-radius:8px;background:#06C755;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">L</div>
+            <div style="font-size:12px;color:#22415F;line-height:1.5">已發送 LINE 通知，開場前 2 小時再次提醒</div>
+          </div>
+          <div onClick="{{ closeDone }}" style="margin-top:18px;height:50px;border-radius:14px;background:#27496E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer">查看我的訂單</div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},&quot;bgUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;外圍背景圖&quot;,&quot;label&quot;:&quot;外部圖片網址&quot;},&quot;bgBlur&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;外圍背景圖&quot;},&quot;bgDim&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:40,&quot;min&quot;:0,&quot;max&quot;:90,&quot;step&quot;:5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;外圍背景圖&quot;},&quot;appBgUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;App 底圖&quot;,&quot;label&quot;:&quot;外部圖片網址&quot;},&quot;appBgOpacity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:100,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:2,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;App 底圖&quot;},&quot;appBgBlur&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:16,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;App 底圖&quot;}}">
+const COURTS = [
+  { id: 'A', name: 'A 場（室內）', note: '木地板・冷氣' },
+  { id: 'B', name: 'B 場（室內）', note: '木地板・觀眾席' }
+];
+const pad = n => String(n).padStart(2, '0');
+const DOW = ['日', '一', '二', '三', '四', '五', '六'];
+
+class Component extends DCLogic {
+  state = {
+    tab: 'book', dateIdx: 0, court: 'A', slots: [], people: 4,
+    name: '', phone: '', deposit: true, done: false, doneLine: '',
+    orders: [{ id: 'DL2609121', date: '9/18 (五)', court: 'A 場', time: '19:00–20:00', people: 4, total: 500, status: 'paid' }]
+  };
+
+  days() {
+    const out = [];
+    const base = new Date(2026, 8, 16);
+    for (let i = 0; i < 10; i++) {
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+      const w = d.getDay();
+      const weekend = w === 0 || w === 6;
+      out.push({
+        key: i, dow: i === 0 ? '今天' : DOW[w], dd: `${d.getMonth() + 1}/${d.getDate()}`,
+        open: weekend ? 8 : 10, close: weekend ? 22 : 22.5,
+        hours: weekend ? '假日 08:00–22:00' : '平日 10:00–22:30'
+      });
+    }
+    return out;
+  }
+
+  slotList(day) {
+    const out = [];
+    for (let t = day.open; t < day.close; t += 0.5) {
+      const h = Math.floor(t), m = t % 1 ? '30' : '00';
+      const key = `${this.state.court}-${day.key}-${pad(h)}${m}`;
+      let hash = 0;
+      for (const ch of key) hash = (hash * 31 + ch.charCodeAt(0)) % 97;
+      out.push({ key, label: `${pad(h)}:${m}`, booked: hash % 5 === 0 });
+    }
+    return out;
+  }
+
+  chip(active, extra) {
+    return `height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;cursor:pointer;transition:.15s;${extra || ''}` +
+      (active ? 'background:#27496E;color:#fff;border:1px solid #27496E;' : 'background:#fff;color:#22415F;border:1px solid #DED3BE;');
+  }
+
+  bgDefs() {
+    return [
+      { key: 'app', label: 'App 底圖', hint: '訂位內容後方的底圖・建議 780×1688 px（390×844 @2x）', op: 100 },
+      { key: 'hero', label: '主視覺橫幅', hint: '首頁球場照片區・建議 780×524 px（390×262 @2x）', op: 100 },
+      { key: 'stats', label: '數據面板', hint: '今日空檔 / 場租・建議 716×200 px', op: 45 },
+      { key: 'date', label: '選擇日期卡', hint: '建議 716×280 px', op: 22 },
+      { key: 'court', label: '選擇場地卡', hint: '建議 716×280 px', op: 22 },
+      { key: 'slot', label: '時段卡', hint: '建議 716×560 px', op: 22 },
+      { key: 'people', label: '人數卡', hint: '建議 716×220 px', op: 22 },
+      { key: 'contact', label: '聯絡資料卡', hint: '建議 716×460 px', op: 22 },
+      { key: 'group', label: '揪團頁標題', hint: '建議 780×260 px', op: 50 },
+      { key: 'class', label: '課程頁標題', hint: '建議 780×260 px', op: 50 },
+      { key: 'mine', label: '我的頁標題', hint: '建議 780×260 px', op: 50 },
+      { key: 'admin', label: '後台頁標題', hint: '建議 780×320 px', op: 50 },
+      { key: 'logo', label: '品牌 Logo', hint: '建議 200×200 px（去背 PNG）', op: 100 },
+      { key: 'tabbar', label: '底部導覽列背景', hint: '建議 780×180 px', op: 60 },
+    ];
+  }
+
+  txtDefs() {
+    return [
+      { key: 'venue', label: '場館名稱', def: '東璘匹克運動館' },
+      { key: 'en', label: '英文品牌名', def: 'DONGLIN PICKLEBALL' },
+      { key: 'tagline', label: '標題列標語', def: '運動・連結・成長' },
+      { key: 'heroTag', label: '主視覺標語', def: 'PLAY · CONNECT · GROW' },
+      { key: 'groupTitle', label: '揪團頁標題', def: '散客揪團' },
+      { key: 'groupSub', label: '揪團頁說明', def: '一個人也能打，加入已開的場次分攤場租' },
+      { key: 'classTitle', label: '課程頁標題', def: '教練課程' },
+      { key: 'classSub', label: '課程頁說明', def: '含場地與球具，新手可直接報名' },
+      { key: 'address', label: '場館地址', def: '台南市麻豆區東角里文昌路18-1號（麻豆國小旁）' },
+      { key: 'hours', label: '營業時間', def: '平日 10:00–22:30・假日 08:00–22:00' },
+      { key: 'facility', label: '設備說明', def: '2 面室內木地板球場・冷氣・免費球拍租借・淋浴間・機械車位' },
+      { key: 'phone', label: '聯絡電話', def: '04-2345-6789' }
+    ];
+  }
+
+  txt(key) {
+    const d = this.txtDefs().find(x => x.key === key);
+    const v = ((this.state.txt || {})[key] ?? '').trim();
+    return v || (d ? d.def : '');
+  }
+
+  setTxt(key, val) {
+    this.setState(st => {
+      const txt = { ...(st.txt || {}), [key]: val };
+      try { localStorage.setItem('donglin-txt-v1', JSON.stringify(txt)); } catch (e) {}
+      return { txt };
+    });
+  }
+
+  bgOf(key) {
+    const d = this.bgDefs().find(x => x.key === key) || { op: 100 };
+    const v = (this.state.bg || {})[key] || {};
+    return { url: this.srcFor((v.url || '').trim()), op: v.op ?? d.op };
+  }
+
+  layer(key, over) {
+    const { url, op } = this.bgOf(key);
+    if (!url) return '';
+    const a = (1 - op / 100).toFixed(2);
+    const veil = over === 'dark'
+      ? `linear-gradient(160deg,rgba(11,37,69,${a}),rgba(11,37,69,${a}))`
+      : `linear-gradient(180deg,rgba(255,255,255,${a}),rgba(255,255,255,${a}))`;
+    return `background-image:${veil},url("${url}");background-size:cover;background-position:center;`;
+  }
+
+  srcFor(url) {
+    if (!url) return '';
+    if (!url.startsWith('data:')) return url;
+    this._objUrls = this._objUrls || {};
+    if (this._objUrls[url]) return this._objUrls[url];
+    try {
+      const [head, body] = url.split(',');
+      const mime = (head.match(/data:([^;]+)/) || [])[1] || 'image/png';
+      const bin = atob(body);
+      const buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      const u = URL.createObjectURL(new Blob([buf], { type: mime }));
+      this._objUrls[url] = u;
+      return u;
+    } catch (e) { return ''; }
+  }
+
+  setBg(key, patch) {
+    this.setState(st => {
+      const bg = { ...(st.bg || {}), [key]: { ...(st.bg || {})[key], ...patch } };
+      try { localStorage.setItem('donglin-bg-v1', JSON.stringify(bg)); } catch (e) {}
+      return { bg };
+    });
+  }
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem('donglin-bg-v1');
+      if (raw) this.setState({ bg: JSON.parse(raw) });
+      const rawT = localStorage.getItem('donglin-txt-v1');
+      if (rawT) this.setState({ txt: JSON.parse(rawT) });
+    } catch (e) {}
+    const sync = () => {
+      const p = document.getElementById('page-backdrop');
+      const a = document.getElementById('app-backdrop');
+      const pf = !!(p && p.hasAttribute('data-filled'));
+      const af = !!(a && a.hasAttribute('data-filled'));
+      if (pf !== !!this.state.pageFilled || af !== !!this.state.appFilled)
+        this.setState({ pageFilled: pf, appFilled: af });
+    };
+    this._bgTimer = setInterval(sync, 400);
+    setTimeout(sync, 60);
+  }
+
+  componentWillUnmount() { clearInterval(this._bgTimer); }
+
+  renderVals() {
+    const s = this.state, days = this.days(), day = days[s.dateIdx];
+    const slots = this.slotList(day);
+    const sel = slots.filter(x => s.slots.includes(x.key));
+    const total = sel.length * 250;
+
+    const bgUrl = (this.bgOf('page').url || this.props.bgUrl || '').trim();
+    const blur = this.props.bgBlur ?? 0;
+    const dim = this.props.bgDim ?? 40;
+    const base = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+    const fx = `filter:blur(${blur}px) saturate(1.05);transform:scale(1.08);`;
+    const pageFilled = bgUrl || s.pageFilled;
+    const appU = (this.bgOf('app').url || this.props.appBgUrl || '').trim();
+    const appFilled = appU || s.appFilled;
+    const appOp = this.bgOf('app').url ? this.bgOf('app').op : (this.props.appBgOpacity ?? 100);
+    const appLayer = `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:${(appOp / 100).toFixed(2)};`;
+
+    const cardBase = 'margin:14px 16px 0;border-radius:22px;padding:16px;background-color:#FFFDF8;border:1px solid #E2D9C6;box-shadow:0 12px 26px -22px rgba(27,58,88,.55);';
+    const heroUrl = this.bgOf('hero').url;
+
+    return {
+      cardDate: cardBase + this.layer('date'),
+      cardCourt: cardBase + this.layer('court'),
+      cardSlot: cardBase + this.layer('slot'),
+      cardPeople: cardBase + this.layer('people'),
+      cardContact: cardBase + this.layer('contact'),
+      panelStats: 'margin:14px 16px 0;position:relative;display:flex;gap:10px;'
+        + (this.bgOf('stats').url ? 'border-radius:22px;padding:10px;' + this.layer('stats') : ''),
+      heroTintOpacity: heroUrl ? 0.34 : 1,
+      hdrGroup: 'padding:52px 20px 20px;color:#fff;background-color:#27496E;' + (this.bgOf('group').url ? this.layer('group', 'dark') : 'background-image:linear-gradient(160deg,#3D6D95 0%,#365F86 42%,#1B3A58 100%);'),
+      hdrClass: 'padding:52px 20px 20px;color:#fff;background-color:#27496E;' + (this.bgOf('class').url ? this.layer('class', 'dark') : 'background-image:linear-gradient(160deg,#3D6D95 0%,#365F86 42%,#1B3A58 100%);'),
+      hdrMine: 'padding:52px 20px 20px;color:#fff;background-color:#27496E;' + (this.bgOf('mine').url ? this.layer('mine', 'dark') : 'background-image:linear-gradient(160deg,#3D6D95 0%,#365F86 42%,#1B3A58 100%);'),
+      hdrAdmin: 'padding:52px 20px 20px;color:#fff;background-color:#1B3A58;' + (this.bgOf('admin').url ? this.layer('admin', 'dark') : 'background-image:linear-gradient(160deg,#22415F 0%,#1B3A58 100%);'),
+      heroBgStyle: heroUrl
+        ? `position:absolute;inset:0;background-image:url("${heroUrl}");background-size:cover;background-position:center;opacity:${(this.bgOf('hero').op / 100).toFixed(2)};`
+        : 'display:none',
+      heroSlotStyle: heroUrl ? 'display:none' : 'position:absolute;inset:0;width:100%;height:100%',
+
+      adminIsBg: s.adminView === 'bg',
+      adminIsTxt: s.adminView === 'txt',
+      adminIsOrders: s.adminView !== 'bg' && s.adminView !== 'txt',
+      ...Object.fromEntries(this.txtDefs().map(d => ['t' + d.key.charAt(0).toUpperCase() + d.key.slice(1), this.txt(d.key)])),
+      txtRows: this.txtDefs().map(d => ({
+        label: d.label,
+        value: (s.txt || {})[d.key] ?? '',
+        placeholder: d.def,
+        multiline: d.def.length > 24,
+        rowStyle: d.def.length > 24
+          ? 'display:none'
+          : 'height:44px;width:100%;border-radius:11px;border:1px solid #DED3BE;background:#fff;padding:0 12px;font-size:13.5px;font-family:inherit;color:#1B3A58;outline:none',
+        areaStyle: d.def.length > 24
+          ? 'width:100%;min-height:62px;border-radius:11px;border:1px solid #DED3BE;background:#fff;padding:10px 12px;font-size:13.5px;line-height:1.55;font-family:inherit;color:#1B3A58;outline:none;resize:vertical'
+          : 'display:none',
+        onInput: e => this.setTxt(d.key, e.target.value)
+      })),
+      onResetTxt: () => {
+        try { localStorage.removeItem('donglin-txt-v1'); } catch (e) {}
+        this.setState({ txt: {} });
+      },
+      adminTabs: [{ id: 'orders', label: '訂位資訊' }, { id: 'bg', label: '背景圖設定' }, { id: 'txt', label: '文字設定' }].map(t => ({
+        label: t.label,
+        onClick: () => this.setState({ adminView: t.id }),
+        style: `flex:1;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer;transition:.15s;`
+          + ((s.adminView || 'orders') === t.id
+            ? 'background:#fff;color:#1B3A58;box-shadow:0 1px 3px rgba(11,37,69,.16);'
+            : 'color:#7A7263;')
+      })),
+      bgRows: this.bgDefs().map(d => {
+        const cur = this.bgOf(d.key);
+        return {
+          label: d.label,
+          hint: (d.hint || '') + (d.hint ? '　' : '') + (cur.url ? '・已套用' : '・尚未設定'),
+          url: cur.url, opacity: cur.op,
+          thumbStyle: `width:42px;height:42px;flex:0 0 auto;border-radius:11px;border:1px solid #E2D9C6;background-color:#EFE7D6;`
+            + (cur.url ? `background-image:url("${cur.url}");background-size:cover;background-position:center;` : ''),
+          onUrl: e => this.setBg(d.key, { url: e.target.value }),
+          fileLabel: cur.url ? '更換圖片' : '瀏覽圖片',
+          onFile: e => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const r = new FileReader();
+            r.onload = () => this.setBg(d.key, { url: r.result });
+            r.readAsDataURL(file);
+          },
+          onOpacity: e => this.setBg(d.key, { op: Number(e.target.value) }),
+          onClear: cur.url ? () => this.setBg(d.key, { url: '', op: d.op }) : null,
+          clearStyle: `padding:0 12px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto;`
+            + (cur.url ? 'background:#EFE7D6;color:#27496E;cursor:pointer;' : 'background:#EFE7D6;color:#B3A894;')
+        };
+      }),
+      onResetBg: () => {
+        try { localStorage.removeItem('donglin-bg-v1'); } catch (e) {}
+        this.setState({ bg: {} });
+      },
+
+      logoStyle: (() => {
+        const u = this.bgOf('logo').url;
+        const box = 'width:76px;height:76px;flex:0 0 auto;border-radius:16px;overflow:hidden;';
+        return u
+          ? box + `background-image:url("${u}");background-size:contain;background-repeat:no-repeat;background-position:center;`
+          : box + 'background-color:#F3EDE0;border:1px dashed #C6A36A;';
+      })(),
+      appBgUrl: appU || undefined,
+      appBgImgStyle: appU ? appLayer + `pointer-events:none;background-image:url("${appU}");background-size:cover;background-position:center;` : 'display:none',
+      appBgSlotStyle: appU ? 'display:none'
+        : appFilled ? appLayer
+        : 'position:absolute;left:16px;right:16px;bottom:150px;height:96px;z-index:2;border-radius:18px;opacity:.96;color:#1B3A58;',
+      appBgScrimStyle: 'display:none',
+      bgUrl: bgUrl || undefined,
+      bgImgStyle: bgUrl ? base + fx + `pointer-events:none;background-image:url("${bgUrl}");background-size:cover;background-position:center;` : 'display:none',
+      bgSlotStyle: bgUrl ? 'display:none'
+        : pageFilled ? base + fx + 'opacity:.9'
+        : 'position:absolute;left:24px;top:24px;width:190px;height:120px;border-radius:18px;z-index:2;color:#DCEBF8;',
+      bgScrimStyle: pageFilled
+        ? `position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(8,26,46,${(dim / 100 * 0.82).toFixed(2)}) 0%,rgba(8,26,46,${(dim / 100 * 1.05).toFixed(2)}) 100%)`
+        : 'display:none',
+
+      isBook: s.tab === 'book',
+      isGroup: s.tab === 'group',
+      isClass: s.tab === 'class',
+      isMine: s.tab === 'mine',
+      isAdmin: s.tab === 'admin',
+
+      groups: [
+        { id: 'g1', level: '初階 2.5–3.0', date: '9/16 (三)', time: '20:00–21:30', court: 'B 場', host: 'Amy', fee: 200, joined: 2, cap: 4 },
+        { id: 'g2', level: '中階 3.5', date: '9/17 (四)', time: '19:00–21:00', court: 'A 場', host: '阿宏', fee: 250, joined: 3, cap: 4 },
+        { id: 'g3', level: '不限程度', date: '9/19 (六)', time: '09:00–11:00', court: 'A 場', host: '教練 Ken', fee: 180, joined: 4, cap: 4 }
+      ].map(g => {
+        const joinedMe = s.joins && s.joins.includes(g.id);
+        const full = g.joined >= g.cap && !joinedMe;
+        return {
+          ...g, joined: g.joined + (joinedMe ? 1 : 0),
+          btnText: joinedMe ? '已加入' : full ? '候補' : '加入',
+          onJoin: () => this.setState(st => ({ joins: (st.joins || []).includes(g.id) ? st.joins.filter(k => k !== g.id) : [...(st.joins || []), g.id] })),
+          btnStyle: `padding:0 18px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer;` +
+            (joinedMe ? 'background:#EFE7D6;color:#27496E;' : full ? 'background:#fff;border:1px solid #DED3BE;color:#7A7263;' : 'background:#27496E;color:#C6A36A;')
+        };
+      }),
+
+      classes: [
+        { initial: 'K', title: '新手入門 2 小時', coach: 'Ken 教練', slot: '每週六 09:00', fee: 800 },
+        { initial: 'A', title: '發球與截擊班', coach: 'Amy 教練', slot: '每週三 20:00', fee: 900 },
+        { initial: 'H', title: '一對一私人指導', coach: '阿宏 教練', slot: '時段可約', fee: 1500 }
+      ].map(c => {
+        const booked = s.classBooked && s.classBooked.includes(c.title);
+        return {
+          ...c, btnText: booked ? '已預約' : '預約',
+          onBook: () => this.setState(st => ({ classBooked: (st.classBooked || []).includes(c.title) ? st.classBooked.filter(k => k !== c.title) : [...(st.classBooked || []), c.title] })),
+          btnStyle: `padding:0 18px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer;` +
+            (booked ? 'background:#EFE7D6;color:#27496E;' : 'background:#27496E;color:#C6A36A;')
+        };
+      }),
+
+      orders: s.orders.map(o => ({
+        ...o,
+        badge: o.status === 'paid' ? '已付訂金' : '保留中',
+        badgeStyle: `font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;flex:0 0 auto;` +
+          (o.status === 'paid' ? 'background:#EFE7D6;color:#27496E;' : 'background:#FFF3D6;color:#8A6A18;'),
+        onCancel: () => this.setState(st => ({ orders: st.orders.filter(x => x.id !== o.id) }))
+      })),
+
+      lineText: s.lineOn === false ? '關閉' : '已開啟',
+      lineStyle: `display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:16px;padding:14px;margin-top:24px;cursor:pointer;border:1.5px solid ${s.lineOn === false ? '#E2D9C6' : '#27496E'};`,
+      toggleLine: () => this.setState({ lineOn: s.lineOn === false }),
+
+      adminRows: (s.adminRows || [
+        { id: 'r1', time: '10:00–11:00', who: '林先生', court: 'A 場', status: 'paid' },
+        { id: 'r2', time: '11:00–12:30', who: '新手入門班', court: 'B 場', status: 'class' },
+        { id: 'r3', time: '14:00–15:00', who: '陳小姐', court: 'A 場', status: 'hold' },
+        { id: 'r4', time: '19:00–20:00', who: '王小明', court: 'A 場', status: 'paid' },
+        { id: 'r5', time: '20:00–21:30', who: '揪團・Amy', court: 'B 場', status: 'group' }
+      ]).map((r, i, arr) => ({
+        ...r, people: r.status === 'class' ? 8 : 4,
+        onDelete: () => this.setState({ adminRows: arr.filter(x => x.id !== r.id) }),
+        badge: { paid: '已付款', hold: '保留中', class: '課程', group: '揪團' }[r.status],
+        badgeStyle: `font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;flex:0 0 auto;` +
+          { paid: 'background:#EFE7D6;color:#27496E;', hold: 'background:#FFF3D6;color:#8A6A18;', class: 'background:#E8EFFB;color:#2A4A7A;', group: 'background:#F2EAFB;color:#5B3A87;' }[r.status]
+      })),
+
+      freeToday: this.slotList(days[0]).filter(x => !x.booked).length,
+      hoursLabel: day.hours,
+      name: s.name, phone: s.phone,
+      onName: e => this.setState({ name: e.target.value }),
+      onPhone: e => this.setState({ phone: e.target.value }),
+
+      dates: days.map((d, i) => ({
+        ...d,
+        onClick: () => this.setState({ dateIdx: i, slots: [] }),
+        style: `flex:0 0 auto;width:58px;padding:10px 0;border-radius:14px;text-align:center;cursor:pointer;transition:.15s;` +
+          (i === s.dateIdx ? 'background:#27496E;color:#fff;' : 'background:#fff;color:#22415F;border:1px solid #E2D9C6;')
+      })),
+
+      courts: COURTS.map(c => ({
+        ...c,
+        onClick: () => this.setState({ court: c.id, slots: [] }),
+        style: `padding:14px;border-radius:16px;cursor:pointer;transition:.15s;` +
+          (s.court === c.id ? 'background:#27496E;color:#fff;' : 'background:#fff;color:#22415F;border:1px solid #E2D9C6;')
+      })),
+
+      slots: slots.map(x => ({
+        label: x.label,
+        onClick: x.booked ? null : () => this.setState(st => ({
+          slots: st.slots.includes(x.key) ? st.slots.filter(k => k !== x.key) : [...st.slots, x.key]
+        })),
+        style: x.booked
+          ? 'height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;background:#E9E2D4;color:#B3A894;text-decoration:line-through;'
+          : `height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;` +
+            (s.slots.includes(x.key) ? 'background:#27496E;color:#C6A36A;' : 'background:#fff;color:#22415F;border:1px solid #DED3BE;')
+      })),
+
+      peopleOpts: [2, 4, 6, 8, 10, 12, 16, 32].map(n => ({
+        label: `${n} 人`, onClick: () => this.setState({ people: n }),
+        style: this.chip(s.people === n, '')
+      })),
+
+      deposit: s.deposit,
+      depositText: s.deposit ? `NT$ ${Math.round(total * 0.3)}` : '關閉',
+      depositStyle: `display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:14px;cursor:pointer;background:#fff;color:#1B3A58;border:1.5px solid ${s.deposit ? '#27496E' : '#E2D9C6'};`,
+      toggleDeposit: () => this.setState({ deposit: !s.deposit }),
+
+      showBar: s.tab === 'book',
+      total, 
+      summaryLine: sel.length
+        ? `${day.dd} ${sel[0].label} 起・${sel.length * 30} 分鐘・${COURTS.find(c => c.id === s.court).name}`
+        : '請選擇時段',
+      ctaText: sel.length ? '確認訂位' : '選擇時段',
+      ctaStyle: `flex:0 0 auto;padding:0 22px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;transition:.15s;` +
+        (sel.length ? 'background:#27496E;color:#C6A36A;cursor:pointer;' : 'background:#E9E2D4;color:#B3A894;'),
+      onConfirm: sel.length ? () => {
+        const o = {
+          id: 'DL' + (2609200 + s.orders.length + 1), date: `${day.dd} (${DOW[new Date(2026, 8, 16 + s.dateIdx).getDay()]})`,
+          court: COURTS.find(c => c.id === s.court).name.slice(0, 3), people: s.people, total,
+          time: `${sel[0].label}–${sel[sel.length - 1].label}`, status: s.deposit ? 'paid' : 'hold'
+        };
+        this.setState({ done: true, doneLine: `${o.date} ${o.time}・${o.court}・${s.people} 人，共 NT$${total}`, orders: [o, ...s.orders], slots: [] });
+      } : null,
+
+      done: s.done,
+      doneLine: s.doneLine,
+      closeDone: () => this.setState({ done: false, tab: 'mine' }),
+
+      tabBarStyle: (() => {
+        const b = this.bgOf('tabbar');
+        const base = 'backdrop-filter:blur(14px);border-top:1px solid #E4DCCB;display:flex;padding:6px 8px 26px;background-color:rgba(255,255,255,.94);';
+        if (!b.url) return base;
+        const a = (1 - b.op / 100).toFixed(2);
+        return 'backdrop-filter:none;border-top:1px solid #E4DCCB;display:flex;padding:6px 8px 26px;background-color:transparent;'
+          + `background-image:linear-gradient(rgba(255,255,255,${a}),rgba(255,255,255,${a})),url("${b.url}");background-size:cover;background-position:center;`;
+      })(),
+      tabs: [
+        { id: 'book', label: '訂位', glyph: 'M6.5 14.5 3 18a2.1 2.1 0 0 0 3 3l3.5-3.5M9 16a7 7 0 1 0 0-9.9A7 7 0 0 0 9 16z' },
+        { id: 'group', label: '揪團', glyph: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-5.5 9c.5-3.4 2.7-5.2 5.5-5.2s5 1.8 5.5 5.2M16 7.4a3 3 0 0 1 0 5.8m2 6.4c-.3-2.2-1-3.7-2.1-4.7' },
+        { id: 'class', label: '課程', glyph: 'M4 5.5h6.2c1 0 1.8.8 1.8 1.8V19c0-1-.8-1.8-1.8-1.8H4zM20 5.5h-6.2c-1 0-1.8.8-1.8 1.8V19c0-1 .8-1.8 1.8-1.8H20z' },
+        { id: 'mine', label: '我的', glyph: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 8.5c.6-3.9 3.4-6 7-6s6.4 2.1 7 6' },
+        { id: 'admin', label: '後台', glyph: 'M6 3.5h12a1.5 1.5 0 0 1 1.5 1.5v14A1.5 1.5 0 0 1 18 20.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 6 3.5zM8.5 8.5h7M8.5 12h7M8.5 15.5h4' }
+      ].map(t => {
+        const active = s.tab === t.id;
+        const color = active ? '%230B2545' : '%23375B7F';
+        const custom = this.bgOf('tab_' + t.id).url;
+        const svg = `url(data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27${color}%27%20stroke-width%3D%271.8%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27${encodeURIComponent(t.glyph)}%27%2F%3E%3C%2Fsvg%3E)`;
+        return {
+          ...t, onClick: () => this.setState({ tab: t.id }),
+          iconStyle: t.id === 'class' ? 'width:24px;height:24px;margin:0 auto' : `width:24px;height:24px;margin:0 auto;background-color:transparent;background-repeat:no-repeat;background-position:center;background-size:contain;opacity:${custom ? (this.bgOf('tab_' + t.id).op / 100).toFixed(2) : 1};background-image:${custom ? `url("${custom}")` : svg};`,
+          style: `flex:1;padding:8px 0 7px;text-align:center;cursor:pointer;border-radius:12px;` +
+            (active ? 'color:#1B3A58;background:transparent;box-shadow:inset 0 0 0 1.5px #C6A36A;' : 'color:#4F5E6E;background:transparent;')
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
