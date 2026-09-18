@@ -523,7 +523,8 @@ class Component extends DCLogic {
       { key: 'app', label: 'App 底圖', hint: '訂位內容後方的底圖・建議 780×1688 px（390×844 @2x）', op: 100, w: 780,
         url: 'https://res.cloudinary.com/dbiirpmpy/image/upload/v1789711281/dink176/appbg.png' },
       { key: 'hero', label: '主視覺橫幅', hint: '首頁球場照片區・建議 780×524 px（390×262 @2x）', op: 100, w: 780, url: HERO_IMG },
-      { key: 'stats', label: '數據面板', hint: '今日空檔 / 場租・建議 716×200 px', op: 45, w: 716 },
+      // w 跟著主視覺取 780（而非 716），轉換網址才會一致、共用同一份快取。
+      { key: 'stats', label: '數據面板', hint: '今日空檔 / 場租・建議 716×200 px', op: 45, w: 780, url: HERO_IMG },
       // 三個頁面標題共用主視覺，轉換參數相同所以只會下載一次。
       { key: 'group', label: '揪團頁標題', hint: '建議 780×260 px', op: 50, w: 780, url: HERO_IMG },
       { key: 'class', label: '課程頁標題', hint: '建議 780×260 px', op: 50, w: 780, url: HERO_IMG },
