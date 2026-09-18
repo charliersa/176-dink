@@ -1,6 +1,15 @@
 const SHEET_NAME = 'Bookings';
 const SETTINGS_SHEET_NAME = 'Settings';
 
+// 後台密碼不寫在程式碼裡（這個檔案會進公開 repo）。
+// 設定位置：Apps Script 編輯器 → 專案設定 → 指令碼屬性
+//   屬性：ADMIN_PASSWORD   值：你的密碼
+function checkPassword_(password) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected) return false;
+  return String(password || '') === String(expected);
+}
+
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || '';
 
@@ -18,7 +27,15 @@ function doGet(e) {
 function doPost(e) {
   const data = JSON.parse(e.postData.contents || '{}');
 
+  if (data.type === 'login') {
+    return json_({ ok: checkPassword_(data.password) });
+  }
+
   if (data.type === 'settings') {
+    // 密碼不符就什麼都不寫，改前端也繞不過去。
+    if (!checkPassword_(data.password)) {
+      return json_({ ok: false, error: 'unauthorized' });
+    }
     if (data.bg) writeSetting_('bg', data.bg);
     if (data.txt) writeSetting_('txt', data.txt);
     return json_({ ok: true, saved: 'settings' });

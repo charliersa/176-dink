@@ -432,9 +432,14 @@ const GOOGLE_SHEET_WEB_APP_URL = '';
 // Cloudinary：到 cloudinary.com 後台 Settings → Upload → Upload presets
 // 建立一組 Signing Mode = Unsigned 的 preset，再把兩個值填進來。
 // 留空時後台仍可選圖，但只會存在這台裝置的瀏覽器裡。
-// 後台密碼。改版號可讓所有裝置上的舊本機設定失效，套用新的預設底圖。
-const ADMIN_PASSWORD = '176dink';
+// 後台密碼存在 Apps Script 的指令碼屬性，不寫在這裡也不進 repo。
+// 前端只把輸入的密碼送去後端比對，比對通過才拿得到設定寫入權限。
+const ADMIN_PW_KEY = 'donglin-admin-pw';
 const BG_KEY = 'donglin-bg-v2';
+
+function adminPw() {
+  try { return sessionStorage.getItem(ADMIN_PW_KEY) || ''; } catch (e) { return ''; }
+}
 
 const CLOUDINARY_CLOUD_NAME = 'dbiirpmpy';
 const CLOUDINARY_UPLOAD_PRESET = '';
@@ -628,20 +633,54 @@ class Component extends DCLogic {
     }
   }
 
+  // 密碼由後端比對，前端拿不到正確答案，因此無法被改前端繞過。
+  async adminLogin() {
+    const pw = (this.state.adminPwInput || '').trim();
+    if (!pw) return this.setState({ adminPwError: '請輸入密碼' });
+    if (!GOOGLE_SHEET_WEB_APP_URL) {
+      return this.setState({ adminPwError: '尚未設定後端網址，無法驗證密碼' });
+    }
+
+    this.setState({ adminPwError: '驗證中…' });
+    try {
+      const res = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ type: 'login', password: pw })
+      });
+      const data = await res.json();
+      if (data && data.ok) {
+        try { sessionStorage.setItem(ADMIN_PW_KEY, pw); } catch (e) {}
+        this.setState({ adminAuthed: true, adminPwInput: '', adminPwError: '' });
+      } else {
+        this.setState({ adminPwError: '密碼錯誤，請重新輸入' });
+      }
+    } catch (e) {
+      this.setState({ adminPwError: '無法連線到後端，請稍後再試' });
+    }
+  }
+
   // 後台設定同步到 Google Sheets，讓所有訪客與裝置看到同一份底圖。
   pushSettings(patch) {
     if (!GOOGLE_SHEET_WEB_APP_URL) return;
     clearTimeout(this._settingsTimer);
     this._settingsPending = { ...(this._settingsPending || {}), ...patch };
-    this._settingsTimer = setTimeout(() => {
+    this._settingsTimer = setTimeout(async () => {
       const payload = this._settingsPending || {};
       this._settingsPending = null;
-      fetch(GOOGLE_SHEET_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ type: 'settings', ...payload })
-      }).catch(() => {});
+      try {
+        const res = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ type: 'settings', password: adminPw(), ...payload })
+        });
+        const data = await res.json();
+        // 密碼被撤銷或改掉時，後端會拒絕；此時把後台重新上鎖。
+        if (data && data.error === 'unauthorized') {
+          try { sessionStorage.removeItem(ADMIN_PW_KEY); } catch (e) {}
+          this.setState({ adminAuthed: false, adminPwError: '登入已失效，請重新輸入密碼' });
+        }
+      } catch (e) {}
     }, 600);
   }
 
@@ -671,9 +710,7 @@ class Component extends DCLogic {
       if (rawT) this.setState({ txt: JSON.parse(rawT) });
     } catch (e) {}
     this.pullSettings();
-    try {
-      if (sessionStorage.getItem('donglin-admin') === '1') this.setState({ adminAuthed: true });
-    } catch (e) {}
+    if (adminPw()) this.setState({ adminAuthed: true });
     const sync = () => {
       const p = document.getElementById('page-backdrop');
       const a = document.getElementById('app-backdrop');
@@ -752,16 +789,9 @@ class Component extends DCLogic {
         ? 'margin-top:8px;font-size:12px;color:#B4442F;font-weight:700'
         : 'display:none',
       onAdminPw: e => this.setState({ adminPwInput: e.target.value, adminPwError: '' }),
-      onAdminLogin: () => {
-        if ((this.state.adminPwInput || '') === ADMIN_PASSWORD) {
-          try { sessionStorage.setItem('donglin-admin', '1'); } catch (e) {}
-          this.setState({ adminAuthed: true, adminPwInput: '', adminPwError: '' });
-        } else {
-          this.setState({ adminPwError: '密碼錯誤，請重新輸入' });
-        }
-      },
+      onAdminLogin: () => this.adminLogin(),
       onAdminLock: () => {
-        try { sessionStorage.removeItem('donglin-admin'); } catch (e) {}
+        try { sessionStorage.removeItem(ADMIN_PW_KEY); } catch (e) {}
         this.setState({ adminAuthed: false, adminPwInput: '', adminPwError: '' });
       },
       ...Object.fromEntries(this.txtDefs().map(d => ['t' + d.key.charAt(0).toUpperCase() + d.key.slice(1), this.txt(d.key)])),
