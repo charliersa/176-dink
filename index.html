@@ -297,7 +297,7 @@
             <sc-if value="{{ adminIsBg }}" hint-placeholder-val="{{ false }}">
               <div>
                 <div style="font-size:15px;font-weight:800;color:#1B3A58">背景圖設定</div>
-                <div style="font-size:12px;color:#7A7263;margin-top:5px;line-height:1.6">點「瀏覽圖片」從裝置選檔套用到該區塊；濃度控制圖片與底色的混合。</div>
+                <div style="font-size:12px;color:#7A7263;margin-top:5px;line-height:1.6">點「瀏覽圖片」選檔後會自動上傳到 Cloudinary，並同步給所有裝置；濃度控制圖片與底色的混合。</div>
                 <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
                   <sc-for list="{{ bgRows }}" as="b" hint-placeholder-count="6">
                     <div style="background:#fff;border:1px solid #E2D9C6;border-radius:16px;padding:12px 14px">
@@ -316,6 +316,7 @@
                           <span>{{ b.fileLabel }}</span>
                         </div>
                       </div>
+                      <input value="{{ b.rawUrl }}" onChange="{{ b.onUrl }}" placeholder="或貼上 Cloudinary 圖片網址" style="width:100%;height:38px;margin-top:8px;border-radius:11px;border:1px solid #DED3BE;background:#fff;padding:0 12px;font-size:11.5px;font-family:inherit;color:#1B3A58;outline:none;box-sizing:border-box" />
                       <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
                         <div style="font-size:11.5px;color:#7A7263;font-weight:700;width:34px;flex:0 0 auto">濃度</div>
                         <input type="range" min="0" max="100" step="5" value="{{ b.opacity }}" onChange="{{ b.onOpacity }}" style="flex:1;accent-color:#365F86" />
@@ -413,6 +414,41 @@ const COURTS = [
   { id: 'B', name: 'B 場（室內）', note: '木地板・觀眾席' }
 ];
 const GOOGLE_SHEET_WEB_APP_URL = '';
+
+// Cloudinary：到 cloudinary.com 後台 Settings → Upload → Upload presets
+// 建立一組 Signing Mode = Unsigned 的 preset，再把兩個值填進來。
+// 留空時後台仍可選圖，但只會存在這台裝置的瀏覽器裡。
+const CLOUDINARY_CLOUD_NAME = 'dbiirpmpy';
+const CLOUDINARY_UPLOAD_PRESET = '';
+const CLOUDINARY_FOLDER = 'dink176';
+
+async function uploadToCloudinary(file) {
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) return null;
+  const form = new FormData();
+  form.append('file', file);
+  form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  if (CLOUDINARY_FOLDER) form.append('folder', CLOUDINARY_FOLDER);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    method: 'POST',
+    body: form
+  });
+  if (!res.ok) throw new Error('Cloudinary 上傳失敗（HTTP ' + res.status + '）');
+  const data = await res.json();
+  if (!data.secure_url) throw new Error('Cloudinary 未回傳圖片網址');
+  return data.secure_url;
+}
+
+// 讓 Cloudinary 依實際需要的尺寸壓縮、轉檔，省流量也更快。
+function cdnUrl(url, width) {
+  if (!url) return url;
+  const m = url.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!m) return url;
+  // 已經帶轉換參數就不再疊加；v1234567 是版本號，不是轉換參數。
+  const first = m[2].split('/')[0];
+  if (/^[a-z]{1,3}_/.test(first)) return url;
+  const t = 'f_auto,q_auto' + (width ? ',w_' + width + ',c_limit' : '');
+  return m[1] + t + '/' + m[2];
+}
 const pad = n => String(n).padStart(2, '0');
 const DOW = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -458,20 +494,16 @@ class Component extends DCLogic {
 
   bgDefs() {
     return [
-      { key: 'app', label: 'App 底圖', hint: '訂位內容後方的底圖・建議 780×1688 px（390×844 @2x）', op: 100 },
-      { key: 'hero', label: '主視覺橫幅', hint: '首頁球場照片區・建議 780×524 px（390×262 @2x）', op: 100 },
-      { key: 'stats', label: '數據面板', hint: '今日空檔 / 場租・建議 716×200 px', op: 45 },
-      { key: 'date', label: '選擇日期卡', hint: '建議 716×280 px', op: 22 },
-      { key: 'court', label: '選擇場地卡', hint: '建議 716×280 px', op: 22 },
-      { key: 'slot', label: '時段卡', hint: '建議 716×560 px', op: 22 },
-      { key: 'people', label: '人數卡', hint: '建議 716×220 px', op: 22 },
-      { key: 'contact', label: '聯絡資料卡', hint: '建議 716×460 px', op: 22 },
-      { key: 'group', label: '揪團頁標題', hint: '建議 780×260 px', op: 50 },
-      { key: 'class', label: '課程頁標題', hint: '建議 780×260 px', op: 50 },
-      { key: 'mine', label: '我的頁標題', hint: '建議 780×260 px', op: 50 },
-      { key: 'admin', label: '後台頁標題', hint: '建議 780×320 px', op: 50 },
-      { key: 'logo', label: '品牌 Logo', hint: '建議 200×200 px（去背 PNG）', op: 100 },
-      { key: 'tabbar', label: '底部導覽列背景', hint: '建議 780×180 px', op: 60 },
+      { key: 'app', label: 'App 底圖', hint: '訂位內容後方的底圖・建議 780×1688 px（390×844 @2x）', op: 100, w: 780,
+        url: 'https://res.cloudinary.com/dbiirpmpy/image/upload/v1789711281/dink176/appbg.png' },
+      { key: 'hero', label: '主視覺橫幅', hint: '首頁球場照片區・建議 780×524 px（390×262 @2x）', op: 100, w: 780 },
+      { key: 'stats', label: '數據面板', hint: '今日空檔 / 場租・建議 716×200 px', op: 45, w: 716 },
+      { key: 'group', label: '揪團頁標題', hint: '建議 780×260 px', op: 50, w: 780 },
+      { key: 'class', label: '課程頁標題', hint: '建議 780×260 px', op: 50, w: 780 },
+      { key: 'mine', label: '我的頁標題', hint: '建議 780×260 px', op: 50, w: 780 },
+      { key: 'admin', label: '後台頁標題', hint: '建議 780×320 px', op: 50, w: 780 },
+      { key: 'logo', label: '品牌 Logo', hint: '建議 200×200 px（去背 PNG）', op: 100, w: 200 },
+      { key: 'tabbar', label: '底部導覽列背景', hint: '建議 780×180 px', op: 60, w: 780 },
     ];
   }
 
@@ -502,6 +534,7 @@ class Component extends DCLogic {
     this.setState(st => {
       const txt = { ...(st.txt || {}), [key]: val };
       try { localStorage.setItem('donglin-txt-v1', JSON.stringify(txt)); } catch (e) {}
+      this.pushSettings({ txt });
       return { txt };
     });
   }
@@ -509,7 +542,9 @@ class Component extends DCLogic {
   bgOf(key) {
     const d = this.bgDefs().find(x => x.key === key) || { op: 100 };
     const v = (this.state.bg || {})[key] || {};
-    return { url: this.srcFor((v.url || '').trim()), op: v.op ?? d.op };
+    // 後台清除過就是明確的空值；沒設定過才用 bgDefs 的預設圖。
+    const raw = (v.url === undefined ? (d.url || '') : v.url).trim();
+    return { url: this.srcFor(raw, d.w), op: v.op ?? d.op };
   }
 
   layer(key, over) {
@@ -522,9 +557,9 @@ class Component extends DCLogic {
     return `background-image:${veil},url("${url}");background-size:cover;background-position:center;`;
   }
 
-  srcFor(url) {
+  srcFor(url, width) {
     if (!url) return '';
-    if (!url.startsWith('data:')) return url;
+    if (!url.startsWith('data:')) return cdnUrl(url, width);
     this._objUrls = this._objUrls || {};
     if (this._objUrls[url]) return this._objUrls[url];
     try {
@@ -543,8 +578,71 @@ class Component extends DCLogic {
     this.setState(st => {
       const bg = { ...(st.bg || {}), [key]: { ...(st.bg || {})[key], ...patch } };
       try { localStorage.setItem('donglin-bg-v1', JSON.stringify(bg)); } catch (e) {}
+      this.pushSettings({ bg });
       return { bg };
     });
+  }
+
+  setBgBusy(key, msg) {
+    this.setState(st => ({ bgBusy: { ...(st.bgBusy || {}), [key]: msg } }));
+  }
+
+  async pickImage(key, file) {
+    this.setBgBusy(key, 'uploading');
+    try {
+      const url = await uploadToCloudinary(file);
+      if (url) {
+        this.setBg(key, { url });
+        this.setBgBusy(key, '');
+        return;
+      }
+      // 尚未設定 Cloudinary：退回舊行為，圖片只存在這台裝置。
+      const dataUrl = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(new Error('讀取檔案失敗'));
+        r.readAsDataURL(file);
+      });
+      this.setBg(key, { url: dataUrl });
+      this.setBgBusy(key, '僅存本機（未設定 Cloudinary）');
+    } catch (err) {
+      this.setBgBusy(key, (err && err.message) || '上傳失敗');
+    }
+  }
+
+  // 後台設定同步到 Google Sheets，讓所有訪客與裝置看到同一份底圖。
+  pushSettings(patch) {
+    if (!GOOGLE_SHEET_WEB_APP_URL) return;
+    clearTimeout(this._settingsTimer);
+    this._settingsPending = { ...(this._settingsPending || {}), ...patch };
+    this._settingsTimer = setTimeout(() => {
+      const payload = this._settingsPending || {};
+      this._settingsPending = null;
+      fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ type: 'settings', ...payload })
+      }).catch(() => {});
+    }, 600);
+  }
+
+  async pullSettings() {
+    if (!GOOGLE_SHEET_WEB_APP_URL) return;
+    try {
+      const res = await fetch(GOOGLE_SHEET_WEB_APP_URL + '?action=settings');
+      const data = await res.json();
+      const next = {};
+      if (data && data.bg && Object.keys(data.bg).length) {
+        next.bg = data.bg;
+        try { localStorage.setItem('donglin-bg-v1', JSON.stringify(data.bg)); } catch (e) {}
+      }
+      if (data && data.txt && Object.keys(data.txt).length) {
+        next.txt = data.txt;
+        try { localStorage.setItem('donglin-txt-v1', JSON.stringify(data.txt)); } catch (e) {}
+      }
+      if (Object.keys(next).length) this.setState(next);
+    } catch (e) {}
   }
 
   componentDidMount() {
@@ -554,6 +652,7 @@ class Component extends DCLogic {
       const rawT = localStorage.getItem('donglin-txt-v1');
       if (rawT) this.setState({ txt: JSON.parse(rawT) });
     } catch (e) {}
+    this.pullSettings();
     const sync = () => {
       const p = document.getElementById('page-backdrop');
       const a = document.getElementById('app-backdrop');
@@ -599,11 +698,12 @@ class Component extends DCLogic {
     const heroUrl = this.bgOf('hero').url;
 
     return {
-      cardDate: cardBase + this.layer('date'),
-      cardCourt: cardBase + this.layer('court'),
-      cardSlot: cardBase + this.layer('slot'),
-      cardPeople: cardBase + this.layer('people'),
-      cardContact: cardBase + this.layer('contact'),
+      // 訂位五卡維持純底色，不開放設定背景圖。
+      cardDate: cardBase,
+      cardCourt: cardBase,
+      cardSlot: cardBase,
+      cardPeople: cardBase,
+      cardContact: cardBase,
       panelStats: 'margin:14px 16px 0;position:relative;display:flex;gap:10px;'
         + (this.bgOf('stats').url ? 'border-radius:22px;padding:10px;' + this.layer('stats') : ''),
       heroTintOpacity: heroUrl ? 0.34 : 1,
@@ -635,6 +735,7 @@ class Component extends DCLogic {
       })),
       onResetTxt: () => {
         try { localStorage.removeItem('donglin-txt-v1'); } catch (e) {}
+        this.pushSettings({ txt: {} });
         this.setState({ txt: {} });
       },
       adminTabs: [{ id: 'orders', label: '訂位資訊' }, { id: 'bg', label: '背景圖設定' }, { id: 'txt', label: '文字設定' }].map(t => ({
@@ -647,30 +748,35 @@ class Component extends DCLogic {
       })),
       bgRows: this.bgDefs().map(d => {
         const cur = this.bgOf(d.key);
+        const busy = (s.bgBusy || {})[d.key];
+        const status = busy === 'uploading' ? '・上傳中…'
+          : busy ? '・' + busy
+          : cur.url ? '・已套用' : '・尚未設定';
         return {
           label: d.label,
-          hint: (d.hint || '') + (d.hint ? '　' : '') + (cur.url ? '・已套用' : '・尚未設定'),
+          hint: (d.hint || '') + (d.hint ? '　' : '') + status,
           url: cur.url, opacity: cur.op,
+          rawUrl: ((s.bg || {})[d.key] || {}).url ?? (d.url || ''),
           thumbStyle: `width:42px;height:42px;flex:0 0 auto;border-radius:11px;border:1px solid #E2D9C6;background-color:#EFE7D6;`
             + (cur.url ? `background-image:url("${cur.url}");background-size:cover;background-position:center;` : ''),
           onUrl: e => this.setBg(d.key, { url: e.target.value }),
-          fileLabel: cur.url ? '更換圖片' : '瀏覽圖片',
+          fileLabel: busy === 'uploading' ? '上傳中…' : cur.url ? '更換圖片' : '瀏覽圖片',
           onFile: e => {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
-            const r = new FileReader();
-            r.onload = () => this.setBg(d.key, { url: r.result });
-            r.readAsDataURL(file);
+            e.target.value = '';
+            this.pickImage(d.key, file);
           },
           onOpacity: e => this.setBg(d.key, { op: Number(e.target.value) }),
-          onClear: cur.url ? () => this.setBg(d.key, { url: '', op: d.op }) : null,
+          onClear: cur.url ? () => { this.setBg(d.key, { url: '', op: d.op }); this.setBgBusy(d.key, ''); } : null,
           clearStyle: `padding:0 12px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto;`
             + (cur.url ? 'background:#EFE7D6;color:#27496E;cursor:pointer;' : 'background:#EFE7D6;color:#B3A894;')
         };
       }),
       onResetBg: () => {
         try { localStorage.removeItem('donglin-bg-v1'); } catch (e) {}
-        this.setState({ bg: {} });
+        this.pushSettings({ bg: {} });
+        this.setState({ bg: {}, bgBusy: {} });
       },
 
       logoStyle: (() => {

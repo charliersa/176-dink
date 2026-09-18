@@ -1,14 +1,30 @@
 const SHEET_NAME = 'Bookings';
+const SETTINGS_SHEET_NAME = 'Settings';
 
-function doGet() {
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true, service: 'donglin-bookings' }))
-    .setMimeType(ContentService.MimeType.JSON);
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) || '';
+
+  if (action === 'settings') {
+    return json_({
+      ok: true,
+      bg: readSetting_('bg'),
+      txt: readSetting_('txt')
+    });
+  }
+
+  return json_({ ok: true, service: 'donglin-bookings' });
 }
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents || '{}');
-  const sheet = getSheet_();
+
+  if (data.type === 'settings') {
+    if (data.bg) writeSetting_('bg', data.bg);
+    if (data.txt) writeSetting_('txt', data.txt);
+    return json_({ ok: true, saved: 'settings' });
+  }
+
+  const sheet = getSheet_(SHEET_NAME);
 
   if (sheet.getLastRow() === 0) {
     sheet.appendRow([
@@ -23,12 +39,51 @@ function doPost(e) {
     data.deposit || '', data.status || '', data.createdAt || new Date().toISOString()
   ]);
 
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true, id: data.id || null }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return json_({ ok: true, id: data.id || null });
 }
 
-function getSheet_() {
+// 設定表為兩欄：key / value(JSON)，bg 與 txt 各佔一列。
+function writeSetting_(key, value) {
+  const sheet = getSheet_(SETTINGS_SHEET_NAME);
+  const payload = JSON.stringify(value);
+  const last = sheet.getLastRow();
+
+  if (last === 0) {
+    sheet.appendRow(['key', 'value', 'updatedAt']);
+  } else {
+    const keys = sheet.getRange(2, 1, Math.max(last - 1, 1), 1).getValues();
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i][0] === key) {
+        sheet.getRange(i + 2, 2, 1, 2).setValues([[payload, new Date().toISOString()]]);
+        return;
+      }
+    }
+  }
+
+  sheet.appendRow([key, payload, new Date().toISOString()]);
+}
+
+function readSetting_(key) {
+  const sheet = getSheet_(SETTINGS_SHEET_NAME);
+  const last = sheet.getLastRow();
+  if (last < 2) return {};
+
+  const rows = sheet.getRange(2, 1, last - 1, 2).getValues();
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i][0] === key) {
+      try { return JSON.parse(rows[i][1] || '{}'); } catch (err) { return {}; }
+    }
+  }
+  return {};
+}
+
+function getSheet_(name) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  return spreadsheet.getSheetByName(SHEET_NAME) || spreadsheet.insertSheet(SHEET_NAME);
+  return spreadsheet.getSheetByName(name) || spreadsheet.insertSheet(name);
+}
+
+function json_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
