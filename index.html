@@ -526,7 +526,9 @@ class Component extends DCLogic {
       { key: 'class', label: '課程頁標題', hint: '建議 780×260 px', op: 50, w: 780 },
       { key: 'mine', label: '我的頁標題', hint: '建議 780×260 px', op: 50, w: 780 },
       { key: 'admin', label: '後台頁標題', hint: '建議 780×320 px', op: 50, w: 780 },
-      { key: 'logo', label: '品牌 Logo', hint: '建議 200×200 px（去背 PNG）', op: 100, w: 200 },
+      // w 取 240：logo 顯示在 76px 方框，3 倍螢幕需要 228px 才不會糊。
+      { key: 'logo', label: '品牌 Logo', hint: '建議 200×200 px（去背 PNG）', op: 100, w: 240,
+        url: 'https://res.cloudinary.com/dbiirpmpy/image/upload/v1789711282/dink176/logo.png' },
       { key: 'tabbar', label: '底部導覽列背景', hint: '建議 780×180 px', op: 60, w: 780,
         url: 'https://res.cloudinary.com/dbiirpmpy/image/upload/v1789711280/dink176/Bottom_navigation_bar.png' },
     ];
