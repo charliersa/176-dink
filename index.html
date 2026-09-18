@@ -408,14 +408,14 @@
     <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
       <div style="position:absolute;inset:0;background:rgba(11,18,14,.55);display:flex;align-items:flex-end;padding:16px">
         <div style="background:#fff;border-radius:24px;padding:26px 22px;width:100%">
-          <div style="width:52px;height:52px;border-radius:50%;background:#C6A36A;display:flex;align-items:center;justify-content:center;font-size:24px">✓</div>
-          <div style="font-size:20px;font-weight:900;color:#1B3A58;margin-top:14px">訂位完成</div>
+          <div style="{{ doneIconStyle }}">{{ doneIcon }}</div>
+          <div style="font-size:20px;font-weight:900;color:#1B3A58;margin-top:14px">{{ doneTitle }}</div>
           <div style="font-size:13.5px;color:#7A7263;margin-top:6px;line-height:1.6">{{ doneLine }}</div>
-          <div style="display:flex;gap:10px;align-items:center;background:#EFE7D6;border-radius:14px;padding:12px;margin-top:16px">
+          <div style="{{ doneNoteStyle }}">
             <div style="width:30px;height:30px;border-radius:8px;background:#06C755;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">L</div>
             <div style="font-size:12px;color:#22415F;line-height:1.5">已發送 LINE 通知，開場前 2 小時再次提醒</div>
           </div>
-          <div onClick="{{ closeDone }}" style="margin-top:18px;height:50px;border-radius:14px;background:#27496E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer">查看我的訂單</div>
+          <div onClick="{{ closeDone }}" style="margin-top:18px;height:50px;border-radius:14px;background:#27496E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer">{{ doneBtnLabel }}</div>
         </div>
       </div>
     </sc-if>
@@ -478,7 +478,7 @@ const DOW = ['日', '一', '二', '三', '四', '五', '六'];
 class Component extends DCLogic {
   state = {
     tab: 'book', dateIdx: 0, court: 'A', slots: [], people: 4,
-    name: '', phone: '', deposit: true, submitting: false, done: false, doneLine: '',
+    name: '', phone: '', deposit: true, submitting: false, done: false, doneOk: true, doneLine: '',
     orders: [{ id: 'DL2609121', date: '9/18 (五)', court: 'A 場', time: '19:00–20:00', people: 4, total: 500, status: 'paid' }]
   };
 
@@ -725,14 +725,18 @@ class Component extends DCLogic {
 
   componentWillUnmount() { clearInterval(this._bgTimer); }
 
+  // 一定要讀得到伺服器回應，否則寫入失敗時客人仍會看到「訂位完成」。
   async saveBooking(booking) {
-    if (!GOOGLE_SHEET_WEB_APP_URL) return;
-    await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+    if (!GOOGLE_SHEET_WEB_APP_URL) throw new Error('尚未設定 Google Sheet 網址');
+    const res = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(booking)
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data || !data.ok) throw new Error('伺服器未確認寫入');
+    return data;
   }
 
   renderVals() {
@@ -1002,9 +1006,13 @@ class Component extends DCLogic {
         this.setState({ submitting: true });
         try {
           await this.saveBooking(booking);
-          this.setState({ done: true, doneLine: `${o.date} ${o.time}・${o.court}・${s.people} 人，共 NT$${total}`, orders: [o, ...s.orders], slots: [] });
+          this.setState({ done: true, doneOk: true, doneLine: `${o.date} ${o.time}・${o.court}・${s.people} 人，共 NT$${total}`, orders: [o, ...s.orders], slots: [] });
         } catch (e) {
-          this.setState({ done: true, doneLine: '訂位已建立，但 Google Sheet 暫時無法同步，請稍後確認。' });
+          // 寫入沒成功就不能說訂到了，也不要加進「我的訂單」造成誤會。
+          this.setState({
+            done: true, doneOk: false,
+            doneLine: `系統暫時無法送出這筆訂位，場館並未收到。請直接來電 ${this.txt('phone')} 完成預約。`
+          });
         } finally {
           this.setState({ submitting: false });
         }
@@ -1012,7 +1020,15 @@ class Component extends DCLogic {
 
       done: s.done,
       doneLine: s.doneLine,
-      closeDone: () => this.setState({ done: false, tab: 'mine' }),
+      doneIcon: s.doneOk ? '✓' : '！',
+      doneIconStyle: 'width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;'
+        + (s.doneOk ? 'background:#C6A36A' : 'background:#B4442F'),
+      doneTitle: s.doneOk ? '訂位完成' : '訂位未送出',
+      doneNoteStyle: s.doneOk
+        ? 'display:flex;gap:10px;align-items:center;background:#EFE7D6;border-radius:14px;padding:12px;margin-top:16px'
+        : 'display:none',
+      doneBtnLabel: s.doneOk ? '查看我的訂單' : '知道了',
+      closeDone: () => this.setState({ done: false, tab: s.doneOk ? 'mine' : 'book' }),
 
       tabBarStyle: (() => {
         const b = this.bgOf('tabbar');
