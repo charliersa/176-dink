@@ -288,7 +288,17 @@
             </div>
           </div>
           <div style="padding:18px 20px 150px">
-            <div style="display:flex;gap:6px;background:#E9E2D4;border-radius:14px;padding:4px;margin-bottom:16px">
+            <sc-if value="{{ adminLocked }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#fff;border:1px solid #E2D9C6;border-radius:16px;padding:20px 18px;margin-top:20px">
+                <div style="font-size:15px;font-weight:800;color:#1B3A58">後台需要密碼</div>
+                <div style="font-size:12px;color:#7A7263;margin-top:6px;line-height:1.6">輸入密碼後即可管理訂位、背景圖與文字設定。</div>
+                <input type="password" value="{{ adminPwInput }}" onChange="{{ onAdminPw }}" placeholder="請輸入密碼" style="width:100%;height:44px;margin-top:14px;border-radius:11px;border:1px solid #DED3BE;background:#fff;padding:0 12px;font-size:13.5px;font-family:inherit;color:#1B3A58;outline:none;box-sizing:border-box" />
+                <div style="{{ adminPwErrStyle }}">{{ adminPwError }}</div>
+                <div onClick="{{ onAdminLogin }}" style="margin-top:12px;height:44px;border-radius:12px;background:#27496E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">進入後台</div>
+              </div>
+            </sc-if>
+
+            <div style="{{ adminTabsStyle }}">
               <sc-for list="{{ adminTabs }}" as="a" hint-placeholder-count="2">
                 <div onClick="{{ a.onClick }}" style="{{ a.style }}">{{ a.label }}</div>
               </sc-for>
@@ -366,6 +376,10 @@
             </div>
             </div>
             </sc-if>
+
+            <sc-if value="{{ adminUnlocked }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ onAdminLock }}" style="margin-top:22px;height:40px;border-radius:12px;border:1px solid #DED3BE;color:#7A7263;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;cursor:pointer;background:#fff">鎖定後台</div>
+            </sc-if>
           </div>
         </div>
       </sc-if>
@@ -418,6 +432,10 @@ const GOOGLE_SHEET_WEB_APP_URL = '';
 // Cloudinary：到 cloudinary.com 後台 Settings → Upload → Upload presets
 // 建立一組 Signing Mode = Unsigned 的 preset，再把兩個值填進來。
 // 留空時後台仍可選圖，但只會存在這台裝置的瀏覽器裡。
+// 後台密碼。改版號可讓所有裝置上的舊本機設定失效，套用新的預設底圖。
+const ADMIN_PASSWORD = '176dink';
+const BG_KEY = 'donglin-bg-v2';
+
 const CLOUDINARY_CLOUD_NAME = 'dbiirpmpy';
 const CLOUDINARY_UPLOAD_PRESET = '';
 const CLOUDINARY_FOLDER = 'dink176';
@@ -577,7 +595,7 @@ class Component extends DCLogic {
   setBg(key, patch) {
     this.setState(st => {
       const bg = { ...(st.bg || {}), [key]: { ...(st.bg || {})[key], ...patch } };
-      try { localStorage.setItem('donglin-bg-v1', JSON.stringify(bg)); } catch (e) {}
+      try { localStorage.setItem(BG_KEY, JSON.stringify(bg)); } catch (e) {}
       this.pushSettings({ bg });
       return { bg };
     });
@@ -635,7 +653,7 @@ class Component extends DCLogic {
       const next = {};
       if (data && data.bg && Object.keys(data.bg).length) {
         next.bg = data.bg;
-        try { localStorage.setItem('donglin-bg-v1', JSON.stringify(data.bg)); } catch (e) {}
+        try { localStorage.setItem(BG_KEY, JSON.stringify(data.bg)); } catch (e) {}
       }
       if (data && data.txt && Object.keys(data.txt).length) {
         next.txt = data.txt;
@@ -647,12 +665,15 @@ class Component extends DCLogic {
 
   componentDidMount() {
     try {
-      const raw = localStorage.getItem('donglin-bg-v1');
+      const raw = localStorage.getItem(BG_KEY);
       if (raw) this.setState({ bg: JSON.parse(raw) });
       const rawT = localStorage.getItem('donglin-txt-v1');
       if (rawT) this.setState({ txt: JSON.parse(rawT) });
     } catch (e) {}
     this.pullSettings();
+    try {
+      if (sessionStorage.getItem('donglin-admin') === '1') this.setState({ adminAuthed: true });
+    } catch (e) {}
     const sync = () => {
       const p = document.getElementById('page-backdrop');
       const a = document.getElementById('app-backdrop');
@@ -716,9 +737,33 @@ class Component extends DCLogic {
         : 'display:none',
       heroSlotStyle: heroUrl ? 'display:none' : 'position:absolute;inset:0;width:100%;height:100%',
 
-      adminIsBg: s.adminView === 'bg',
-      adminIsTxt: s.adminView === 'txt',
-      adminIsOrders: s.adminView !== 'bg' && s.adminView !== 'txt',
+      // 未解鎖時三個分頁與頁籤一律不渲染，只留密碼畫面。
+      adminLocked: !s.adminAuthed,
+      adminUnlocked: !!s.adminAuthed,
+      adminIsBg: !!s.adminAuthed && s.adminView === 'bg',
+      adminIsTxt: !!s.adminAuthed && s.adminView === 'txt',
+      adminIsOrders: !!s.adminAuthed && s.adminView !== 'bg' && s.adminView !== 'txt',
+      adminTabsStyle: s.adminAuthed
+        ? 'display:flex;gap:6px;background:#E9E2D4;border-radius:14px;padding:4px;margin-bottom:16px'
+        : 'display:none',
+      adminPwInput: s.adminPwInput || '',
+      adminPwError: s.adminPwError || '',
+      adminPwErrStyle: s.adminPwError
+        ? 'margin-top:8px;font-size:12px;color:#B4442F;font-weight:700'
+        : 'display:none',
+      onAdminPw: e => this.setState({ adminPwInput: e.target.value, adminPwError: '' }),
+      onAdminLogin: () => {
+        if ((this.state.adminPwInput || '') === ADMIN_PASSWORD) {
+          try { sessionStorage.setItem('donglin-admin', '1'); } catch (e) {}
+          this.setState({ adminAuthed: true, adminPwInput: '', adminPwError: '' });
+        } else {
+          this.setState({ adminPwError: '密碼錯誤，請重新輸入' });
+        }
+      },
+      onAdminLock: () => {
+        try { sessionStorage.removeItem('donglin-admin'); } catch (e) {}
+        this.setState({ adminAuthed: false, adminPwInput: '', adminPwError: '' });
+      },
       ...Object.fromEntries(this.txtDefs().map(d => ['t' + d.key.charAt(0).toUpperCase() + d.key.slice(1), this.txt(d.key)])),
       txtRows: this.txtDefs().map(d => ({
         label: d.label,
@@ -738,9 +783,9 @@ class Component extends DCLogic {
         this.pushSettings({ txt: {} });
         this.setState({ txt: {} });
       },
-      adminTabs: [{ id: 'orders', label: '訂位資訊' }, { id: 'bg', label: '背景圖設定' }, { id: 'txt', label: '文字設定' }].map(t => ({
+      adminTabs: (s.adminAuthed ? [{ id: 'orders', label: '訂位資訊' }, { id: 'bg', label: '背景圖設定' }, { id: 'txt', label: '文字設定' }] : []).map(t => ({
         label: t.label,
-        onClick: () => this.setState({ adminView: t.id }),
+        onClick: () => { if (s.adminAuthed) this.setState({ adminView: t.id }); },
         style: `flex:1;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer;transition:.15s;`
           + ((s.adminView || 'orders') === t.id
             ? 'background:#fff;color:#1B3A58;box-shadow:0 1px 3px rgba(11,37,69,.16);'
@@ -774,7 +819,7 @@ class Component extends DCLogic {
         };
       }),
       onResetBg: () => {
-        try { localStorage.removeItem('donglin-bg-v1'); } catch (e) {}
+        try { localStorage.removeItem(BG_KEY); } catch (e) {}
         this.pushSettings({ bg: {} });
         this.setState({ bg: {}, bgBusy: {} });
       },
